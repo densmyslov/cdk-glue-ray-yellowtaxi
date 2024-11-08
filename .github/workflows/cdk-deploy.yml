@@ -66,7 +66,7 @@ jobs:
         run: |
           source .venv/bin/activate  # Activate the virtual environment
           if [ "${{ github.ref }}" == "refs/heads/stage" ]; then
-            cdk deploy CdkEmailParserStack-Stage -c env_name=stage --require-approval never --force
+            cdk deploy CdkGlueRayYellowtaxiStack-Stage -c env_name=stage --require-approval never --force
           elif [ "${{ github.ref }}" == "refs/heads/main" ]; then
-            cdk deploy CdkEmailParserStack-Prod -c env_name=prod --require-approval never --force
+            cdk deploy CdkGlueRayYellowtaxiStack-Prod -c env_name=prod --require-approval never --force
           fi
