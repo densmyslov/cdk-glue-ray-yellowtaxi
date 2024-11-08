@@ -78,12 +78,12 @@
     "env": {
       "prod": {
 
-        "bucket_name": "<YOUR UNIQUE PREFIX HERE>-yellow-taxi-prod"
+        "bucket_name": "<bergena-yellow-taxi-prod"
     
 
       },
       "stage": {
-        "bucket_name": "<YOUR UNIQUE PREFIX HERE>-yellow-taxi-stage"
+        "bucket_name": "bergena-yellow-taxi-stage"
     }
   }
 }
