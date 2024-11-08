@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 import os
-from aws_cdk import cdk, App, Environment
+from aws_cdk import App, Environment
 
 from cdk_glue_ray_yellowtaxi.cdk_glue_ray_yellowtaxi_stack import CdkGlueRayYellowtaxiStack
 
