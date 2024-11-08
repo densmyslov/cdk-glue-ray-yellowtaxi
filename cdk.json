@@ -73,6 +73,18 @@
     "@aws-cdk/aws-rds:setCorrectValueForDatabaseInstanceReadReplicaInstanceResourceId": true,
     "@aws-cdk/core:cfnIncludeRejectComplexResourceUpdateCreatePolicyIntrinsics": true,
     "@aws-cdk/aws-lambda-nodejs:sdkV3ExcludeSmithyPackages": true,
-    "@aws-cdk/aws-stepfunctions-tasks:fixRunEcsTaskPolicy": true
+    "@aws-cdk/aws-stepfunctions-tasks:fixRunEcsTaskPolicy": true,
+
+    "env": {
+      "prod": {
+
+        "bucket_name": "<YOUR UNIQUE PREFIX HERE>-yellow-taxi-prod"
+    
+
+      },
+      "stage": {
+        "bucket_name": "<YOUR UNIQUE PREFIX HERE>-yellow-taxi-stage"
+    }
   }
+}
 }

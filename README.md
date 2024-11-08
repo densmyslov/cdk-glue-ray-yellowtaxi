@@ -1,7 +1,7 @@
 
 # Welcome to your CDK Python project!
 
-This is a blank project for CDK development with Python.
+This project is based on AWS Tutorial [Writing an ETL script in AWS Glue for Ray](https://docs.aws.amazon.com/glue/latest/dg/edit-script-ray-intro-tutorial.html) with the addition of CI/CD as a combination of CDK and GitHub Actions.
 
 The `cdk.json` file tells the CDK Toolkit how to execute your app.
 
