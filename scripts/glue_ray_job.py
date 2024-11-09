@@ -1,12 +1,10 @@
-import ray
 import os
-import requests
+import pandas as pd
 from pathlib import Path
 from datetime import datetime
 from time import time
-
-# Initialize Ray cluster
-ray.init('auto')
+import urllib.request
+import awswrangler as wr
 
 # Define paths
 MOUNT_PATH = Path("/tmp/yellow_tripdata")
@@ -22,15 +20,11 @@ def download_data(year: int, month: int) -> str:
     if not s3_path.exists():
         if not YELLOW_TAXI_DATA_PATH.exists():
             YELLOW_TAXI_DATA_PATH.mkdir(parents=True, exist_ok=True)
-        with requests.get(url, stream=True) as r:
-            if r.status_code == 200:
-                print(f"downloading => {s3_path}")
-                # Writing locally (in this case, to /tmp directory)
-                with open(s3_path, "wb") as file:
-                    for chunk in r.iter_content(chunk_size=8192):
-                        file.write(chunk)
-            else:
-                raise ValueError(f"Data not available for {year}-{month:02d}")
+        try:
+            print(f"downloading => {s3_path}")
+            urllib.request.urlretrieve(url, s3_path)
+        except Exception as e:
+            raise ValueError(f"Data not available for {year}-{month:02d}: {e}")
     else:
         print(f"File already exists: {s3_path}")
 
@@ -67,16 +61,21 @@ s = time()
 dataset_path = download_data(year, month)
 print(f"Data downloaded in {time() - s} seconds.")
 
-# Read dataset using Ray
-# Load the data from the downloaded file
-ds = ray.data.read_parquet(dataset_path)
+# Read dataset using pandas
+df = pd.read_parquet(dataset_path)
 
-# Add the given new column to the dataset and show the sample record after adding a new column
-ds = ds.add_column("tip_rate", lambda df: df["tip_amount"] / df["total_amount"])
+# Add the given new column to the dataset
+df["tip_rate"] = df["tip_amount"] / df["total_amount"]
 
-# Dropping few columns from the underlying Dataset
-ds = ds.drop_columns(["payment_type", "fare_amount", "extra", "tolls_amount", "improvement_surcharge"])
+# Dropping few columns from the underlying DataFrame
+df = df.drop(columns=["payment_type", "fare_amount", "extra", "tolls_amount", "improvement_surcharge"])
 
 # Write the transformed dataset to the specified S3 bucket
 bucket_name = os.environ.get("bucket_name")
-ds.write_parquet(f"s3://{bucket_name}/ray/tutorial/output/")
+output_path = f"s3://{bucket_name}/glue/python_shell/output/yellow_tripdata_transformed.parquet"
+
+# Use AWS Glue libraries to write to S3
+
+wr.s3.to_parquet(df=df, path=output_path)
+
+print(f"Data written to {output_path}")
