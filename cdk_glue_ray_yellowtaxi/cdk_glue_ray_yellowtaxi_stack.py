@@ -81,7 +81,7 @@ class CdkGlueRayYellowtaxiStack(Stack):
             command=glue.CfnJob.JobCommandProperty(
                 name="glueetl",
                 python_version="3",
-                script_location=f"s3://{bucket_name}/glue/scripts/glue_ray_job.py"  # Adjust the script location accordingly
+                script_location=glue_script_asset.s3_object_url
             ),
             glue_version="4.0",  # Glue 4.0 supports Ray
             worker_type="G.1X",
