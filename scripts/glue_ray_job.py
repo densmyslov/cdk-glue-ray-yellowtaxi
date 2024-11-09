@@ -1,10 +1,41 @@
 import os
+import subprocess
 import pandas as pd
 from pathlib import Path
 from datetime import datetime
 from time import time
 import urllib.request
 import awswrangler as wr
+
+# Define AWS environment details
+aws_account = os.environ.get("AWS_ACCOUNT_ID", "123456789012")  # Replace with your AWS account ID if not using environment variable
+
+# Define environment configurations from CDK settings
+env = os.environ.get("ENV", "stage")  # Default to "stage" if not provided
+aws_region = os.environ.get("AWS_REGION_STAGE") if env == "stage" else os.environ.get("AWS_REGION_PROD")
+
+if not aws_region:
+    raise ValueError(f"AWS region not specified for environment: {env}")
+
+bucket_name = os.environ.get("BUCKET_NAME_STAGE") if env == "stage" else os.environ.get("BUCKET_NAME_PROD")
+
+if not bucket_name:
+    raise ValueError(f"Bucket name not specified for environment: {env}")
+
+# Construct the bootstrap command
+bootstrap_command = [
+    "cdk",
+    "bootstrap",
+    f"aws://{aws_account}/{aws_region}"
+]
+
+# Run the bootstrap command
+try:
+    print(f"Bootstrapping the {env} environment in region {aws_region}...")
+    subprocess.run(bootstrap_command, check=True)
+    print(f"Successfully bootstrapped the {env} environment in region {aws_region}.")
+except subprocess.CalledProcessError as e:
+    print(f"Failed to bootstrap the {env} environment: {e}")
 
 # Define paths
 MOUNT_PATH = Path("/tmp/yellow_tripdata")
@@ -71,11 +102,9 @@ df["tip_rate"] = df["tip_amount"] / df["total_amount"]
 df = df.drop(columns=["payment_type", "fare_amount", "extra", "tolls_amount", "improvement_surcharge"])
 
 # Write the transformed dataset to the specified S3 bucket
-bucket_name = os.environ.get("bucket_name")
 output_path = f"s3://{bucket_name}/glue/python_shell/output/yellow_tripdata_transformed.parquet"
 
 # Use AWS Glue libraries to write to S3
-
 wr.s3.to_parquet(df=df, path=output_path)
 
 print(f"Data written to {output_path}")
