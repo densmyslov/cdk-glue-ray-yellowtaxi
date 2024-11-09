@@ -49,14 +49,7 @@ class CdkGlueRayYellowtaxiStack(Stack):
         glue_ray_role.add_managed_policy(
             iam.ManagedPolicy.from_aws_managed_policy_name("service-role/AWSGlueServiceRole")
         )
-        # # Create and attach an inline policy for custom permissions
-        # # to read files from nyc-tlc bucket
-        # glue_ray_role.add_to_policy(iam.PolicyStatement(
-        #     actions=[
-        #         "s3:GetObject",
-        #     ],
-        #     resources=["arn:aws:s3:::nyc-tlc/*"]
-        # ))
+
         glue_ray_role.add_to_policy(iam.PolicyStatement(
             actions=[
                 "s3:PutObject",
@@ -102,7 +95,8 @@ class CdkGlueRayYellowtaxiStack(Stack):
             description="AWS Glue job for processing data using Ray",
             default_arguments={
                 "--bucket_name": bucket_name,
-                "--additional-python-modules": "awswrangler,pandas,pyarrow,s3fs"
+                "--additional-python-modules": "awswrangler==2.17.0,\
+                numpy==1.21.2, pandas==1.3.3,pyarrow==5.0.0,s3fs"
             }
         )
 
