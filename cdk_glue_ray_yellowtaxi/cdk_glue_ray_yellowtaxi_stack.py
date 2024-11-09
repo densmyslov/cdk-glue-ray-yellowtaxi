@@ -85,7 +85,7 @@ class CdkGlueRayYellowtaxiStack(Stack):
             ),
             glue_version="4.0",  # Glue 4.0 supports Ray
             worker_type="G.1X",
-            number_of_workers=1,  # Adjust based on the size of your dataset
+            number_of_workers=2,  # Adjust based on the size of your dataset
             description="AWS Glue job for processing data using Ray",
             default_arguments={
                 "--bucket_name": bucket_name
