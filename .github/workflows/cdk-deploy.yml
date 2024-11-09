@@ -1,21 +1,10 @@
 name: Deploy CDK Stack
 
-##########################################################################################################
-####                                BRANCHES TO DEPLOY TO
-####        however, the filters in the last section select which branches to deploy to
-
-##########################################################################################################
-
 on:
   push:
     branches:
       - stage
       - main
-
-##########################################################################################################
-####      THE JOBS BELOW ARE PERFORMED ON THE GITHUB WORKFLOW RUNNER (UBUNTU-LATEST)
-
-##########################################################################################################
 
 jobs:
   deploy:
@@ -43,26 +32,30 @@ jobs:
       - name: Install AWS CDK
         run: npm install -g aws-cdk
 
-##########################################################################################################
-#####                   SECRETS FOR AWS CREDENTIALS
-#####       secrets need to be created in the github repository
-#####       https://docs.github.com/en/actions/security-guides/encrypted-secrets
-##### https://docs.github.com/en/actions/security-for-github-actions/security-guides/using-secrets-in-github-actions#creating-secrets-for-a-repository
+      # Configure AWS Credentials
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
 
-##########################################################################################################
+      # Bootstrap AWS Environment
+      - name: Bootstrap AWS Environment
+        run: |
+          source .venv/bin/activate
+          cdk bootstrap aws://$CDK_DEFAULT_ACCOUNT/$AWS_REGION
+        env:
+          CDK_DEFAULT_ACCOUNT: ${{ secrets.AWS_ACCOUNT_ID }}
+          AWS_REGION: ${{ secrets.AWS_REGION }}
+
+      # Deploy CDK Stack
       - name: Deploy CDK Stack
         env:
-          AWS_REGION: us-east-1
           CDK_DEFAULT_ACCOUNT: ${{ secrets.AWS_ACCOUNT_ID }}
-          CDK_DEFAULT_REGION: ${{ secrets.AWS_REGION }}
+          AWS_REGION: ${{ secrets.AWS_REGION }}
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-##########################################################################################################
-####                        DEPLOYMENT TO STAGE AND PROD BRANCHES
-####        the code activates virtual environment and deploys to the stage branch
-
-##########################################################################################################
-
         run: |
           source .venv/bin/activate  # Activate the virtual environment
           if [ "${{ github.ref }}" == "refs/heads/stage" ]; then
