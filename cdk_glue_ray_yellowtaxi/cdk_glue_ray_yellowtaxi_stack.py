@@ -96,7 +96,8 @@ class CdkGlueRayYellowtaxiStack(Stack):
             description="AWS Glue job for processing data using Pythonshell",
             default_arguments={
                 "--bucket_name": bucket_name,
-                "--additional-python-modules": "numpy==1.22.3, pandas==1.4.2,pyarrow==5.0.0,s3fs==2022.3.0"
+                "--additional-python-modules": "numpy==1.22.3, pandas==1.4.2,pyarrow==5.0.0,s3fs==2022.3.0",
+                "--no-pip-cache": ""
             }
         )
 
