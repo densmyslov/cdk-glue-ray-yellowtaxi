@@ -96,7 +96,7 @@ class CdkGlueRayYellowtaxiStack(Stack):
                 script_location=glue_script_asset.s3_object_url
             ),
             glue_version="4.0",  # Glue 4.0 supports Ray
-            worker_type="G.1X",
+            worker_type="Z.2X",
             number_of_workers=2,  # Adjust based on the size of your dataset
             description="AWS Glue job for processing data using Ray",
             default_arguments={
