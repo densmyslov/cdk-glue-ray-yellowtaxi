@@ -82,15 +82,15 @@ class CdkGlueRayYellowtaxiStack(Stack):
         
         # Create a Glue Job
         glue.CfnJob(
-            self, "GlueRayJob",
+            self, "GluePythonShellJob",
             role=glue_ray_role.role_arn,
             command=glue.CfnJob.JobCommandProperty(
                 name="pythonshell",
                 python_version="3.9",
                 script_location=glue_script_asset.s3_object_url
             ),
-            glue_version="3.0",  # Glue 4.0 supports Ray
-            max_capacity = 0.0625,
+            glue_version="3.0",  
+            max_capacity = 0.5625,
             # worker_type="Z.2x",
             # number_of_workers=2,  # Adjust based on the size of your dataset
             description="AWS Glue job for processing data using Pythonshell",
