@@ -1,12 +1,9 @@
 import os
 import sys
 import pandas as pd
-from pathlib import Path
 from datetime import datetime
 from time import time
 import urllib.request
-import s3fs
-import json
 
 # Define bucket names based on environment
 BUCKET_MAPPING = {
@@ -21,34 +18,30 @@ def get_environment():
         return args_dict.get('--ENV', 'stage')
     return os.environ.get('ENV', 'stage')
 
-env = get_environment()
-bucket_name = BUCKET_MAPPING.get(env)
-if not bucket_name:
-    raise ValueError(f"Unknown environment: {env}")
-
-# Define paths
-MOUNT_PATH = Path("/tmp/yellow_tripdata")
-YELLOW_TAXI_DATA_PATH = MOUNT_PATH
+def create_dir_if_not_exists(path):
+    """Create directory if it doesn't exist."""
+    if not os.path.exists(path):
+        os.makedirs(path)
 
 def download_data(year: int, month: int) -> str:
     """Download yellow taxi data for given year and month."""
+    tmp_dir = "/tmp/yellow_tripdata"
+    create_dir_if_not_exists(tmp_dir)
+    
     filename = f"yellow_tripdata_{year}-{month:02d}.parquet"
+    local_path = os.path.join(tmp_dir, filename)
     url = f"https://d37ci6vzurychx.cloudfront.net/trip-data/{filename}"
-    s3_path = MOUNT_PATH / filename
 
-    # Skip downloading if file exists
-    if not s3_path.exists():
-        if not YELLOW_TAXI_DATA_PATH.exists():
-            YELLOW_TAXI_DATA_PATH.mkdir(parents=True, exist_ok=True)
+    if not os.path.exists(local_path):
         try:
-            print(f"Downloading => {s3_path}")
-            urllib.request.urlretrieve(url, s3_path)
+            print(f"Downloading => {local_path}")
+            urllib.request.urlretrieve(url, local_path)
         except Exception as e:
             raise ValueError(f"Data not available for {year}-{month:02d}: {e}")
     else:
-        print(f"File already exists: {s3_path}")
+        print(f"File already exists: {local_path}")
 
-    return s3_path.as_posix()
+    return local_path
 
 def find_latest_available_data():
     """Find the most recent available data."""
@@ -75,23 +68,29 @@ def find_latest_available_data():
 
 def main():
     try:
+        # Get environment and bucket name
+        env = get_environment()
+        bucket_name = BUCKET_MAPPING.get(env)
+        if not bucket_name:
+            raise ValueError(f"Unknown environment: {env}")
+
         print(f"Starting job in {env} environment using bucket: {bucket_name}")
         
         # Find and download latest available data
         year, month = find_latest_available_data()
         
         start_time = time()
-        dataset_path = download_data(year, month)
+        local_dataset_path = download_data(year, month)
         print(f"Data downloaded in {time() - start_time:.2f} seconds")
 
-        # Read dataset
-        print(f"Reading dataset from {dataset_path}")
-        df = pd.read_parquet(dataset_path)
-        
+        # Read the parquet file
+        print(f"Reading parquet file from {local_dataset_path}")
+        df = pd.read_parquet(local_dataset_path)
+
         # Add tip rate calculation
         print("Calculating tip rates...")
         df["tip_rate"] = df["tip_amount"] / df["total_amount"]
-        
+
         # Drop unnecessary columns
         columns_to_drop = [
             "payment_type",
@@ -103,16 +102,12 @@ def main():
         print(f"Dropping columns: {columns_to_drop}")
         df = df.drop(columns=columns_to_drop)
 
-        # Define output path in S3
+        # Define output path and save to S3
         output_path = f"s3://{bucket_name}/glue/python_shell/output/yellow_tripdata_transformed.parquet"
-
-        # Write to S3
         print(f"Writing transformed data to {output_path}")
-        s3 = s3fs.S3FileSystem()
+        
         df.to_parquet(
             output_path,
-            engine="pyarrow",
-            filesystem=s3,
             index=False
         )
 
