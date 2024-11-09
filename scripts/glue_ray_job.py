@@ -4,7 +4,9 @@ from pathlib import Path
 from datetime import datetime
 from time import time
 import urllib.request
-import awswrangler as wr
+import boto3
+import pyarrow.parquet as pq
+import s3fs
 
 # Define AWS environment details
 aws_account = os.environ.get("AWS_ACCOUNT_ID", "123456789012")  # Replace with your AWS account ID if not using environment variable
@@ -88,7 +90,8 @@ df = df.drop(columns=["payment_type", "fare_amount", "extra", "tolls_amount", "i
 # Write the transformed dataset to the specified S3 bucket
 output_path = f"s3://{bucket_name}/glue/python_shell/output/yellow_tripdata_transformed.parquet"
 
-# Use AWS Glue libraries to write to S3
-wr.s3.to_parquet(df=df, path=output_path)
+# Use boto3 and s3fs to write to S3
+s3 = s3fs.S3FileSystem()
+df.to_parquet(output_path, engine="pyarrow", filesystem=s3)
 
 print(f"Data written to {output_path}")
