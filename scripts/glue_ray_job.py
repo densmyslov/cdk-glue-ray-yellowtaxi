@@ -3,6 +3,7 @@ import os
 import requests
 from pathlib import Path
 from datetime import datetime
+from time import time
 
 # Initialize Ray cluster
 ray.init('auto')
@@ -61,8 +62,10 @@ def find_latest_available_data():
 # Find the latest available data
 year, month = find_latest_available_data()
 
+s = time()
 # Download data for the latest available month
 dataset_path = download_data(year, month)
+print(f"Data downloaded in {time() - s} seconds.")
 
 # Read dataset using Ray
 # Load the data from the downloaded file
