@@ -4,21 +4,23 @@ from pathlib import Path
 from datetime import datetime
 from time import time
 import urllib.request
-import boto3
-import pyarrow.parquet as pq
-import s3fs
+import awswrangler as wr
+import json
+
+# Load environment settings from cdk.json
+with open("cdk.json") as f:
+    cdk_config = json.load(f)
 
 # Define AWS environment details
-aws_account = os.environ.get("AWS_ACCOUNT_ID", "123456789012")  # Replace with your AWS account ID if not using environment variable
-
-# Define environment configurations from CDK settings
 env = os.environ.get("ENV", "stage")  # Default to "stage" if not provided
-aws_region = os.environ.get("AWS_REGION_STAGE") if env == "stage" else os.environ.get("AWS_REGION_PROD")
 
-if not aws_region:
-    raise ValueError(f"AWS region not specified for environment: {env}")
-
-bucket_name = os.environ.get("BUCKET_NAME_STAGE") if env == "stage" else os.environ.get("BUCKET_NAME_PROD")
+# Extract bucket names from cdk.json based on environment
+if env == "stage":
+    bucket_name = cdk_config["env"]["stage"]["bucket_name"]
+elif env == "prod":
+    bucket_name = cdk_config["env"]["prod"]["bucket_name"]
+else:
+    raise ValueError(f"Unknown environment: {env}")
 
 if not bucket_name:
     raise ValueError(f"Bucket name not specified for environment: {env}")
@@ -90,8 +92,7 @@ df = df.drop(columns=["payment_type", "fare_amount", "extra", "tolls_amount", "i
 # Write the transformed dataset to the specified S3 bucket
 output_path = f"s3://{bucket_name}/glue/python_shell/output/yellow_tripdata_transformed.parquet"
 
-# Use boto3 and s3fs to write to S3
-s3 = s3fs.S3FileSystem()
-df.to_parquet(output_path, engine="pyarrow", filesystem=s3)
+# Use AWS Wrangler to write to S3
+wr.s3.to_parquet(df=df, path=output_path)
 
 print(f"Data written to {output_path}")
