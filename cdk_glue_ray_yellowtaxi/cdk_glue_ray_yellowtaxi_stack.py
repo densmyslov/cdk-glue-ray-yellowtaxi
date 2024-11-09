@@ -31,6 +31,7 @@ class CdkGlueRayYellowtaxiStack(Stack):
             removal_policy=RemovalPolicy.DESTROY,  # Optional: for testing only; use RETAIN for prod
             auto_delete_objects=True  # Optional: for testing only
         )
+        
 
 #########################################################################################
 # IAM Role for Glue (Step 2)
