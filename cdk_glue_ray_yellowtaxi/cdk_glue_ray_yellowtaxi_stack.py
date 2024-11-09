@@ -81,7 +81,7 @@ class CdkGlueRayYellowtaxiStack(Stack):
             actions=[
                 "s3:GetObject",
             ],
-            resources=[f"arn:aws:s3:::{glue_script_asset.s3BucketName}/{glue_script_asset.S3ObjectKey}"]
+            resources=[f"arn:aws:s3:::{glue_script_asset.s3_bucket_name}/{glue_script_asset.s3_object_key}"]
         ))
 
 
