@@ -9,7 +9,7 @@ prod_env=Environment(account=os.getenv('CDK_DEFAULT_ACCOUNT'),
                              region=os.getenv('CDK_DEFAULT_REGION'))
 
 stage_env=Environment(account=os.getenv('CDK_DEFAULT_ACCOUNT'), 
-                             region='us-east-2')
+                             region='us-west-2')
 app = App()
 CdkGlueRayYellowtaxiStack(app, "CdkGlueRayYellowtaxiStack-Stage", env=stage_env)
 CdkGlueRayYellowtaxiStack(app, "CdkGlueRayYellowtaxiStack-Prod", env=prod_env)
