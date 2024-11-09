@@ -63,6 +63,8 @@ class CdkGlueRayYellowtaxiStack(Stack):
             resources=[f"arn:aws:s3:::{bucket_name}/*"]
         ))
 
+
+
         # Output the role ARN for reference
         CfnOutput(self, "GlueRayRoleArn", value=glue_ray_role.role_arn, description="The ARN of the Glue Ray job IAM Role")
 
@@ -73,6 +75,13 @@ class CdkGlueRayYellowtaxiStack(Stack):
         glue_script_asset = s3_assets.Asset(self, "GlueRayJobScript",
             path="scripts/glue_ray_job.py"
         )
+
+        glue_ray_role.add_to_policy(iam.PolicyStatement(
+            actions=[
+                "s3:GetObject",
+            ],
+            resources=[glue_script_asset.s3_object_arn]
+        ))
         
         # Create a Glue Job
         glue.CfnJob(
