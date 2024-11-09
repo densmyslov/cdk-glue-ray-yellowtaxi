@@ -76,12 +76,15 @@ class CdkGlueRayYellowtaxiStack(Stack):
             path="scripts/glue_ray_job.py"
         )
 
+        # Add permissions for Glue job to access the Glue script in S3
         glue_ray_role.add_to_policy(iam.PolicyStatement(
             actions=[
                 "s3:GetObject",
             ],
-            resources=[glue_script_asset.s3_object_arn]
+            resources=[f"arn:aws:s3:::{glue_script_asset.s3BucketName}/{glue_script_asset.S3ObjectKey}"]
         ))
+
+
         
         # Create a Glue Job
         glue.CfnJob(
