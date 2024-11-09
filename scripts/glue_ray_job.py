@@ -1,5 +1,4 @@
 import os
-import subprocess
 import pandas as pd
 from pathlib import Path
 from datetime import datetime
@@ -21,21 +20,6 @@ bucket_name = os.environ.get("BUCKET_NAME_STAGE") if env == "stage" else os.envi
 
 if not bucket_name:
     raise ValueError(f"Bucket name not specified for environment: {env}")
-
-# Construct the bootstrap command
-bootstrap_command = [
-    "cdk",
-    "bootstrap",
-    f"aws://{aws_account}/{aws_region}"
-]
-
-# Run the bootstrap command
-try:
-    print(f"Bootstrapping the {env} environment in region {aws_region}...")
-    subprocess.run(bootstrap_command, check=True)
-    print(f"Successfully bootstrapped the {env} environment in region {aws_region}.")
-except subprocess.CalledProcessError as e:
-    print(f"Failed to bootstrap the {env} environment: {e}")
 
 # Define paths
 MOUNT_PATH = Path("/tmp/yellow_tripdata")
