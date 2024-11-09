@@ -40,14 +40,6 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ secrets.AWS_REGION }}
 
-    #   # Bootstrap AWS Environment
-    #   - name: Bootstrap AWS Environment
-    #     run: |
-    #       source .venv/bin/activate
-    #       cdk bootstrap aws://$CDK_DEFAULT_ACCOUNT/$AWS_REGION
-    #     env:
-    #       CDK_DEFAULT_ACCOUNT: ${{ secrets.AWS_ACCOUNT_ID }}
-    #       AWS_REGION: ${{ secrets.AWS_REGION }}
 
       # Deploy CDK Stack
       - name: Deploy CDK Stack
