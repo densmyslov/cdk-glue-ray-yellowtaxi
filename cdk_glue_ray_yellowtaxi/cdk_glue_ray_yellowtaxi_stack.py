@@ -89,14 +89,14 @@ class CdkGlueRayYellowtaxiStack(Stack):
                 python_version="3",
                 script_location=glue_script_asset.s3_object_url
             ),
-            glue_version="4.0",  # Glue 4.0 supports Ray
+            glue_version="3.0",  # Glue 4.0 supports Ray
             worker_type="G.1X",
             number_of_workers=2,  # Adjust based on the size of your dataset
             description="AWS Glue job for processing data using Ray",
             default_arguments={
                 "--bucket_name": bucket_name,
-                "--additional-python-modules": "awswrangler==2.17.0,\
-                numpy==1.21.2, pandas==1.3.3,pyarrow==5.0.0,s3fs"
+                "--additional-python-modules": "awswrangler==2.15.1,\
+                numpy==1.22.3, pandas==1.4.2,pyarrow==5.0.0,s3fs==2022.3.0"
             }
         )
 
