@@ -32,7 +32,6 @@ class CdkGlueRayYellowtaxiStack(Stack):
             auto_delete_objects=True  # Optional: for testing only
         )
 
-
 #########################################################################################
 # IAM Role for Glue (Step 2)
 #########################################################################################
