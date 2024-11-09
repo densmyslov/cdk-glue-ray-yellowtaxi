@@ -103,3 +103,4 @@ class CdkGlueRayYellowtaxiStack(Stack):
                 "--bucket_name": bucket_name
             }
         )
+
