@@ -85,14 +85,14 @@ class CdkGlueRayYellowtaxiStack(Stack):
             self, "GlueRayJob",
             role=glue_ray_role.role_arn,
             command=glue.CfnJob.JobCommandProperty(
-                name="glueetl",
+                name="pythonshell",
                 python_version="3",
                 script_location=glue_script_asset.s3_object_url
             ),
             glue_version="3.0",  # Glue 4.0 supports Ray
-            worker_type="G.1X",
+            worker_type="Standard",
             number_of_workers=2,  # Adjust based on the size of your dataset
-            description="AWS Glue job for processing data using Ray",
+            description="AWS Glue job for processing data using Pythonshell",
             default_arguments={
                 "--bucket_name": bucket_name,
                 "--additional-python-modules": "awswrangler==2.15.1,\
