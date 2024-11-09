@@ -8,7 +8,7 @@ import s3fs
 import json
 
 # Load environment settings from cdk.json
-with open("cdk.json") as f:
+with open("../cdk.json") as f:
     cdk_config = json.load(f)
 
 # Define AWS environment details
