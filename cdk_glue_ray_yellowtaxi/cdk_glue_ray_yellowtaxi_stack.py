@@ -31,7 +31,7 @@ class CdkGlueRayYellowtaxiStack(Stack):
             removal_policy=RemovalPolicy.DESTROY,  # Optional: for testing only; use RETAIN for prod
             auto_delete_objects=True  # Optional: for testing only
         )
-        
+
 
 #########################################################################################
 # IAM Role for Glue (Step 2)
@@ -101,7 +101,8 @@ class CdkGlueRayYellowtaxiStack(Stack):
             number_of_workers=2,  # Adjust based on the size of your dataset
             description="AWS Glue job for processing data using Ray",
             default_arguments={
-                "--bucket_name": bucket_name
+                "--bucket_name": bucket_name,
+                "--additional-python-modules": "awswrangler,pandas,pyarrow,s3fs"
             }
         )
 
