@@ -1,9 +1,5 @@
+import os
 import sys
-from awsglue.transforms import *
-from awsglue.utils import getResolvedOptions
-from pyspark.context import SparkContext
-from awsglue.context import GlueContext
-from awsglue.job import Job
 import pandas as pd
 from pathlib import Path
 from datetime import datetime
@@ -12,23 +8,20 @@ import urllib.request
 import s3fs
 import json
 
-# Initialize Glue context
-sc = SparkContext()
-glueContext = GlueContext(sc)
-spark = glueContext.spark_session
-job = Job(glueContext)
-
-# Get job parameters
-args = getResolvedOptions(sys.argv, ['JOB_NAME', 'ENV'])
-job.init(args['JOB_NAME'], args)
-
 # Define bucket names based on environment
 BUCKET_MAPPING = {
     "stage": "bergena-yellow-taxi-stage",
     "prod": "bergena-yellow-taxi-prod"
 }
 
-env = args.get('ENV', 'stage')  # Default to "stage" if not provided
+def get_environment():
+    """Get environment from AWS Glue job arguments."""
+    if len(sys.argv) > 1:
+        args_dict = dict(arg.split('=', 1) for arg in sys.argv[1:] if '=' in arg)
+        return args_dict.get('--ENV', 'stage')
+    return os.environ.get('ENV', 'stage')
+
+env = get_environment()
 bucket_name = BUCKET_MAPPING.get(env)
 if not bucket_name:
     raise ValueError(f"Unknown environment: {env}")
@@ -82,6 +75,8 @@ def find_latest_available_data():
 
 def main():
     try:
+        print(f"Starting job in {env} environment using bucket: {bucket_name}")
+        
         # Find and download latest available data
         year, month = find_latest_available_data()
         
@@ -89,11 +84,12 @@ def main():
         dataset_path = download_data(year, month)
         print(f"Data downloaded in {time() - start_time:.2f} seconds")
 
-        # Read dataset using pandas (for smaller datasets)
-        # For larger datasets, consider using Spark instead
+        # Read dataset
+        print(f"Reading dataset from {dataset_path}")
         df = pd.read_parquet(dataset_path)
         
         # Add tip rate calculation
+        print("Calculating tip rates...")
         df["tip_rate"] = df["tip_amount"] / df["total_amount"]
         
         # Drop unnecessary columns
@@ -104,12 +100,13 @@ def main():
             "tolls_amount",
             "improvement_surcharge"
         ]
+        print(f"Dropping columns: {columns_to_drop}")
         df = df.drop(columns=columns_to_drop)
 
         # Define output path in S3
         output_path = f"s3://{bucket_name}/glue/python_shell/output/yellow_tripdata_transformed.parquet"
 
-        # Write to S3 using s3fs
+        # Write to S3
         print(f"Writing transformed data to {output_path}")
         s3 = s3fs.S3FileSystem()
         df.to_parquet(
@@ -119,11 +116,10 @@ def main():
             index=False
         )
 
-        print(f"Data successfully written to {output_path}")
-        job.commit()
+        print(f"Job completed successfully. Data written to {output_path}")
+        
     except Exception as e:
         print(f"Error in job execution: {str(e)}")
-        job.commit()
         raise e
 
 if __name__ == "__main__":
