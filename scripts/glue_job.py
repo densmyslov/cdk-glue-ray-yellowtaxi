@@ -84,6 +84,12 @@ def main():
         env_name = get_argument_value("--ENV_NAME", "stage")
         bucket_name = get_argument_value("--BUCKET_NAME", "default-bucket-name")
 
+        env_name = os.environ.get("ENV_NAME", "stage")
+        bucket_name = os.environ.get("BUCKET_NAME", "default-bucket-name")
+
+        print(f"Environment: {env_name}")
+        print(f"Bucket Name: {bucket_name}")
+
         print(f"Running in environment: {env_name}")
         print(f"Using bucket: {bucket_name}")
         

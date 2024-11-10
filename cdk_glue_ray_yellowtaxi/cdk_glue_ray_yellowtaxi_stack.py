@@ -14,6 +14,7 @@ class CdkGlueRayYellowtaxiStack(Stack):
     def __init__(self, scope: Construct, construct_id: str, **kwargs) -> None:
         super().__init__(scope, construct_id, **kwargs)
 
+        # Get the environment name and configuration from cdk.json
         env_name = self.node.try_get_context("env_name") or "stage"
         env_config = self.node.try_get_context("env")[env_name]
 
