@@ -67,7 +67,7 @@ class CdkGlueRayYellowtaxiStack(Stack):
 #########################################################################################
         # Upload the Glue job script to S3
         glue_script_asset = s3_assets.Asset(self, "GlueRayJobScript",
-            path="scripts/glue_ray_job.py"
+            path="scripts/glue_job.py"
         )
 
         # Add permissions for Glue job to access the Glue script in S3
@@ -91,13 +91,10 @@ class CdkGlueRayYellowtaxiStack(Stack):
             ),
             glue_version="3.0",  
             max_capacity = 1,
-            # worker_type="Z.2x",
-            # number_of_workers=2,  # Adjust based on the size of your dataset
             description="AWS Glue job for processing data using Pythonshell",
             default_arguments={
-                "--bucket_name": bucket_name
-                # "--additional-python-modules": "numpy==1.22.3, pandas==1.4.2,pyarrow==5.0.0,s3fs==2022.3.0",
-                # "--no-pip-cache": ""
+                "--ENV_NAME": env_name,
+                "--BUCKET_NAME": bucket_name
             }
         )
 
