@@ -4,6 +4,7 @@ import pandas as pd
 from datetime import datetime
 from time import time
 import urllib.request
+import argparse
 
 # Define bucket names based on environment
 # BUCKET_MAPPING = {
@@ -11,18 +12,37 @@ import urllib.request
 #     "prod": "bergena-yellow-taxi-prod"
 # }
 
-def get_argument_value(arg_name, default_value=None):
-    """Fetch the value of a Glue job argument."""
-    args_dict = dict(arg.split('=', 1) for arg in sys.argv[1:] if '=' in arg)
-    return args_dict.get(arg_name, default_value)
+# def get_argument_value(arg_name, default_value=None):
+#     """Fetch the value of a Glue job argument."""
+#     args_dict = dict(arg.split('=', 1) for arg in sys.argv[1:] if '=' in arg)
+#     return args_dict.get(arg_name, default_value)
 
 
-def get_environment():
-    """Get environment from AWS Glue job arguments."""
-    if len(sys.argv) > 1:
-        args_dict = dict(arg.split('=', 1) for arg in sys.argv[1:] if '=' in arg)
-        return args_dict.get('--ENV', 'stage')
-    return os.environ.get('ENV', 'stage')
+# def get_environment():
+#     """Get environment from AWS Glue job arguments."""
+#     if len(sys.argv) > 1:
+#         args_dict = dict(arg.split('=', 1) for arg in sys.argv[1:] if '=' in arg)
+#         return args_dict.get('--ENV', 'stage')
+#     return os.environ.get('ENV', 'stage')
+
+def parse_arguments():
+    parser = argparse.ArgumentParser(description="AWS Glue Job Arguments")
+
+    # Define the expected arguments
+    parser.add_argument("--ENV_NAME", type=str, default="dev", help="Environment name (e.g., dev, stage, prod)")
+    parser.add_argument("--BUCKET_NAME", type=str, default="default-bucket-name", help="S3 bucket name")
+
+    # Parse the arguments
+    args, unknown = parser.parse_known_args()
+
+    # Extract values
+    env_name = args.ENV_NAME
+    bucket_name = args.BUCKET_NAME
+
+    print(f"Environment: {env_name}")
+    print(f"Bucket Name: {bucket_name}")
+
+    return env_name, bucket_name
 
 def create_dir_if_not_exists(path):
     """Create directory if it doesn't exist."""
@@ -75,14 +95,15 @@ def find_latest_available_data():
 def main():
     try:
         print("Job arguments:", sys.argv)
-        print("Environment:", get_environment())
+        # print("Environment:", get_environment())
 
-        # Retrieve environment and bucket name
-        env_name = get_argument_value("--ENV_NAME", "stage")
-        bucket_name = get_argument_value("--BUCKET_NAME", "default-bucket-name")
+        # # Retrieve environment and bucket name
+        # env_name = get_argument_value("--ENV_NAME", "stage")
+        # bucket_name = get_argument_value("--BUCKET_NAME", "default-bucket-name")
 
-        env_name = os.environ.get("ENV_NAME", "stage")
-        bucket_name = os.environ.get("BUCKET_NAME", "default-bucket-name")
+        # env_name = os.environ.get("ENV_NAME", "stage")
+        # bucket_name = os.environ.get("BUCKET_NAME", "default-bucket-name")
+        env_name, bucket_name = parse_arguments()
 
         print(f"Environment: {env_name}")
         print(f"Bucket Name: {bucket_name}")
