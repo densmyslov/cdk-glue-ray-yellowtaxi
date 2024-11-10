@@ -11,6 +11,18 @@ BUCKET_MAPPING = {
     "prod": "bergena-yellow-taxi-prod"
 }
 
+def get_argument_value(arg_name, default_value=None):
+    """Fetch the value of a Glue job argument."""
+    args_dict = dict(arg.split('=', 1) for arg in sys.argv[1:] if '=' in arg)
+    return args_dict.get(arg_name, default_value)
+
+# Retrieve environment and bucket name
+env_name = get_argument_value("--ENV_NAME", "stage")
+bucket_name = get_argument_value("--BUCKET_NAME", "default-bucket-name")
+
+print(f"Running in environment: {env_name}")
+print(f"Using bucket: {bucket_name}")
+
 def get_environment():
     """Get environment from AWS Glue job arguments."""
     if len(sys.argv) > 1:
