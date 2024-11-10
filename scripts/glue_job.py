@@ -74,11 +74,8 @@ def find_latest_available_data():
 
 def main():
     try:
-        # Get environment and bucket name
-        # env = get_environment()
-        # bucket_name = BUCKET_MAPPING.get(env)
-        # if not bucket_name:
-        #     raise ValueError(f"Unknown environment: {env}")
+        print("Job arguments:", sys.argv)
+        print("Environment:", get_environment())
 
         # Retrieve environment and bucket name
         env_name = get_argument_value("--ENV_NAME", "stage")
