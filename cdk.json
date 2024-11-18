@@ -78,7 +78,7 @@
     "env": {
       "prod": {
 
-        "bucket_name": "<bergena-yellow-taxi-prod"
+        "bucket_name": "bergena-yellow-taxi-prod"
     
 
       },
