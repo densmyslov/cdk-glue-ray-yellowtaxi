@@ -112,7 +112,7 @@ def ingest_data_for_last_10_years(bucket_name: str):
     """Ingest data for the last 10 years."""
     current_year = datetime.now().year
     current_month = datetime.now().month
-    start_year = current_year - 10
+    start_year = current_year - 2
 
     total_file_size = 0
 
