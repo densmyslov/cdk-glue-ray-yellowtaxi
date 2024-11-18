@@ -47,34 +47,57 @@ def download_data(year: int, month: int) -> str:
             print(f"Downloading => {local_path}")
             urllib.request.urlretrieve(url, local_path)
         except Exception as e:
-            raise ValueError(f"Data not available for {year}-{month:02d}: {e}")
+            print(f"Data not available for {year}-{month:02d}: {e}")
+            return None
     else:
         print(f"File already exists: {local_path}")
 
     return local_path
 
-def find_latest_available_data():
-    """Find the most recent available data."""
-    current_date = datetime.now()
-    year = current_date.year
-    month = current_date.month - 1  # Previous month's data
+def ingest_data_for_last_10_years():
+    """Ingest data for the last 10 years."""
+    current_year = datetime.now().year
+    current_month = datetime.now().month
+    start_year = current_year - 10
 
-    # Handle January case
-    if month == 0:
-        year -= 1
-        month = 12
+    all_data = []
 
-    while month > 0:
-        try:
-            download_data(year, month)
-            return year, month
-        except ValueError:
-            month -= 1
-            if month == 0:
-                year -= 1
-                month = 12
+    for year in range(start_year, current_year + 1):
+        for month in range(1, 13):
+            # Skip future months
+            if year == current_year and month >= current_month:
+                break
+            
+            try:
+                local_path = download_data(year, month)
+                if local_path:
+                    print(f"Reading parquet file from {local_path}")
+                    df = pd.read_parquet(local_path)
 
-    raise ValueError("No available data found")
+                    # Add tip rate calculation
+                    df["tip_rate"] = df["tip_amount"] / df["total_amount"]
+
+                    # Drop unnecessary columns
+                    columns_to_drop = [
+                        "payment_type",
+                        "fare_amount",
+                        "extra",
+                        "tolls_amount",
+                        "improvement_surcharge"
+                    ]
+                    df = df.drop(columns=columns_to_drop)
+
+                    all_data.append(df)
+            except Exception as e:
+                print(f"Error processing data for {year}-{month:02d}: {e}")
+
+    # Concatenate all data
+    if all_data:
+        print("Concatenating all data...")
+        combined_df = pd.concat(all_data, ignore_index=True)
+        return combined_df
+    else:
+        raise ValueError("No data was downloaded or processed successfully.")
 
 def main():
     try:
@@ -88,37 +111,16 @@ def main():
         print(f"Running in environment: {env_name}")
         print(f"Using bucket: {bucket_name}")
         
-        # Find and download latest available data
-        year, month = find_latest_available_data()
-        
+        # Ingest data for the last 10 years
         start_time = time()
-        local_dataset_path = download_data(year, month)
-        print(f"Data downloaded in {time() - start_time:.2f} seconds")
-
-        # Read the parquet file
-        print(f"Reading parquet file from {local_dataset_path}")
-        df = pd.read_parquet(local_dataset_path)
-
-        # Add tip rate calculation
-        print("Calculating tip rates...")
-        df["tip_rate"] = df["tip_amount"] / df["total_amount"]
-
-        # Drop unnecessary columns
-        columns_to_drop = [
-            "payment_type",
-            "fare_amount",
-            "extra",
-            "tolls_amount",
-            "improvement_surcharge"
-        ]
-        print(f"Dropping columns: {columns_to_drop}")
-        df = df.drop(columns=columns_to_drop)
+        combined_df = ingest_data_for_last_10_years()
+        print(f"Data ingested in {time() - start_time:.2f} seconds")
 
         # Define output path and save to S3
-        output_path = f"s3://{bucket_name}/glue/python_shell/output/yellow_tripdata_transformed.parquet"
+        output_path = f"s3://{bucket_name}/glue/python_shell/output/yellow_tripdata_10_years_transformed.parquet"
         print(f"Writing transformed data to {output_path}")
         
-        df.to_parquet(
+        combined_df.to_parquet(
             output_path,
             index=False
         )
