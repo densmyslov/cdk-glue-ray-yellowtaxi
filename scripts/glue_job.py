@@ -5,6 +5,7 @@ from datetime import datetime
 from time import time
 import urllib.request
 import argparse
+import psutil
 
 import boto3
 
@@ -112,7 +113,7 @@ def ingest_data_for_last_10_years(bucket_name: str):
     """Ingest data for the last 10 years."""
     current_year = datetime.now().year
     current_month = datetime.now().month
-    start_year = current_year - 2
+    start_year = current_year - 1
 
     total_file_size = 0
 
