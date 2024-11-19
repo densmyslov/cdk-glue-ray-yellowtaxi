@@ -77,7 +77,11 @@ class CdkGlueRayYellowtaxiStack(Stack):
             path="assets/psutil_layer.zip"
         )
 
-        print(f"Psutil Layer S3 URL: {psutil_layer_asset.s3_object_url}")
+        CfnOutput(self, "PsutilLayerS3Url", 
+            value=psutil_layer_asset.s3_object_url, 
+            description="S3 URL of the psutil layer asset"
+        )
+
 
 
 
