@@ -27,9 +27,12 @@ jobs:
         with:
           python-version: '3.9'
 
-      - name: Clean CDK Output Cache
+      
+      - name: Clean Temporary Directories
         run: |
+          rm -rf assets/psutil_package
           rm -rf cdk.out
+        
 
       # Set up Python virtual environment and install dependencies
       - name: Install Python dependencies
