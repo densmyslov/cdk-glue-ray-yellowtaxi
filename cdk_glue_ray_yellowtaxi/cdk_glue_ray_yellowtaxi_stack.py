@@ -72,11 +72,9 @@ class CdkGlueRayYellowtaxiStack(Stack):
 #########################################################################################
 # Glue Layer (Step 4)
 #########################################################################################
-        # Upload the psutil package to S3
-        psutil_layer = glue.CfnJob.PythonScriptProperty(
-            name="psutil_layer",
-            python_version="3.9",
-            script_location=psutil_package_asset.s3_object_url
+        # Upload the psutil layer to S3
+        psutil_layer_asset = s3_assets.Asset(self, "PsutilLayerAsset",
+            path="assets/psutil_layer.zip"
         )
 
 
@@ -88,13 +86,20 @@ class CdkGlueRayYellowtaxiStack(Stack):
             path="scripts/glue_job.py"
         )
 
-        # Add permissions for Glue job to access the Glue script in S3
+#########################################################################################
+# Add permissions for glue_ray_role to access the Glue script and psutil layer in S3
+#########################################################################################
+        # Add permissions for Glue job to access the Glue script and psutil layer in S3
         glue_ray_role.add_to_policy(iam.PolicyStatement(
             actions=[
                 "s3:GetObject",
             ],
-            resources=[f"arn:aws:s3:::{glue_script_asset.s3_bucket_name}/{glue_script_asset.s3_object_key}"]
+            resources=[
+                f"arn:aws:s3:::{glue_script_asset.s3_bucket_name}/{glue_script_asset.s3_object_key}",
+                f"arn:aws:s3:::{psutil_layer_asset.s3_bucket_name}/{psutil_layer_asset.s3_object_key}" 
+            ]
         ))
+
 
 
         
@@ -107,13 +112,14 @@ class CdkGlueRayYellowtaxiStack(Stack):
                 python_version="3.9",
                 script_location=glue_script_asset.s3_object_url
             ),
-            glue_version="3.0",  
-            max_capacity = 1,
-            description="AWS Glue job for processing data using Pythonshell",
+            glue_version="3.0",
+            max_capacity=1,
+            description="AWS Glue job for processing data using Python Shell",
             default_arguments={
                 "--ENV_NAME": env_name,
                 "--BUCKET_NAME": bucket_name,
-                "--additional-python-modules": psutil_package_asset.s3_object_url
+                "--extra-py-files": psutil_layer_asset.s3_object_url
             }
         )
+
 
