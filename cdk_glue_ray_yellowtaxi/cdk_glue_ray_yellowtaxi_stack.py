@@ -19,23 +19,29 @@ class CdkGlueRayYellowtaxiStack(Stack):
         env_config = self.node.try_get_context("env")[env_name]
 
 #################################################################################
-# S3 Bucket (Step 1)
+# Generate S3 Bucket (Step 1 of Tutorial)
 ################################################################################
         # get bucket_name depending on environment
         bucket_name = env_config.get("bucket_name")
         if not bucket_name:
             raise ValueError(f"bucket_name is not defined for environment: {env_name}")
         
+        # Set RemovalPolicy based on environment
+        if env_name == "stage":
+            removal_policy = RemovalPolicy.DESTROY
+        else:
+            removal_policy = RemovalPolicy.RETAIN
+        
         # Create the S3 bucket
-        bucket = s3.Bucket(self, "MyBucket",
+        s3.Bucket(self, "MyBucket",
             bucket_name=bucket_name,
-            removal_policy=RemovalPolicy.DESTROY,  # Optional: for testing only; use RETAIN for prod
-            auto_delete_objects=True  # Optional: for testing only
+            removal_policy=removal_policy,
+            auto_delete_objects=True 
         )
 
 
 #########################################################################################
-# IAM Role for Glue (Step 2)
+# IAM Role for Glue (Step 2 of Tutorial)
 #########################################################################################
 
 

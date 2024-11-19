@@ -104,6 +104,9 @@ def process_data(year: int, month: int, bucket_name: str) -> int:
         file_size = os.path.getsize(transformed_local_path)
         print(f"Ingested {year}-{month:02d}, File Size: {file_size / (1024 * 1024):.2f} MB")
 
+        cpu_usage = psutil.cpu_percent(interval=1)
+        print(f"CPU Usage: {cpu_usage}%")
+        
         return file_size
     except Exception as e:
         print(f"Error processing data for {year}-{month:02d}: {e}")
