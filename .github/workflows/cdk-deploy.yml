@@ -21,24 +21,33 @@ jobs:
         with:
           node-version: '18'
 
-      # Set up Python and install dependencies
+      # Set up Python 3.9
+      - name: Set up Python 3.9
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+
+      # Set up Python virtual environment and install dependencies
       - name: Install Python dependencies
         run: |
-          python -m venv .venv
+          python3.9 -m venv .venv
           source .venv/bin/activate
           pip install -r requirements.txt
-          - name: Package psutil for Glue Layer
-          run: |
-            mkdir -p assets/psutil_package/python
-            pip install psutil==6.1.0 -t assets/psutil_package/python/
-            cd assets/psutil_package
-            zip -r ../psutil_layer.zip ./python
-            cd ../..
-        
+
+      # Package psutil for Glue Layer
+      - name: Package psutil for Glue Layer
+        run: |
+          mkdir -p assets/psutil_package/python
+          python3.9 -m pip install psutil==6.1.0 -t assets/psutil_package/python/
+          cd assets/psutil_package
+          zip -r ../psutil_layer.zip ./python
+          cd ../..
 
       # Install AWS CDK globally
       - name: Install AWS CDK
-        run: npm install -g aws-cdk
+        run: |
+          source .venv/bin/activate
+          npm install -g aws-cdk
 
       # Configure AWS Credentials
       - name: Configure AWS Credentials
@@ -47,8 +56,6 @@ jobs:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ secrets.AWS_REGION }}
-
-
 
       # Deploy CDK Stack
       - name: Deploy CDK Stack
