@@ -5,11 +5,22 @@ from datetime import datetime
 from time import time
 import urllib.request
 import argparse
-import psutil
+import logging
 
 import boto3
 
 # Define bucket names based on environment
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
+logger.info(f"Python sys.path: {sys.path}")
+
+try:
+    import psutil
+    logger.info(f"psutil version: {psutil.__version__}")
+except ModuleNotFoundError as e:
+    logger.error(f"Failed to import psutil: {e}")
 
 def parse_arguments():
     """Get environment and bucket name from stack arguments."""
