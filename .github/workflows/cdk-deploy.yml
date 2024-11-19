@@ -27,33 +27,17 @@ jobs:
         with:
           python-version: '3.9'
 
-      
+      # Clean Temporary Directories
       - name: Clean Temporary Directories
         run: |
-          rm -rf assets/psutil_package
           rm -rf cdk.out
         
-
       # Set up Python virtual environment and install dependencies
       - name: Install Python dependencies
         run: |
           python3.9 -m venv .venv
           source .venv/bin/activate
           pip install -r requirements.txt
-
-      # Package psutil for Glue Layer
-      - name: Package psutil for Glue Layer
-        run: |
-          mkdir -p assets/psutil_package/python
-          python3.9 -m pip install psutil==6.1.0 -t assets/psutil_package/python/
-          # Ensure the folder structure is correct
-          if [ -d "assets/psutil_package/python-3" ]; then
-            mv assets/psutil_package/python-3 assets/psutil_package/python
-          fi
-          cd assets/psutil_package
-          zip -r ../psutil_layer.zip ./python
-          cd ../..
-
 
       # Verify psutil_layer.zip contents
       - name: Verify psutil_layer.zip contents

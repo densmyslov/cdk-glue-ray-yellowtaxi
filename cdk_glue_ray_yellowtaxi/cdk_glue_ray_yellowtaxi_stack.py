@@ -72,10 +72,11 @@ class CdkGlueRayYellowtaxiStack(Stack):
 #########################################################################################
 # Glue Layer (Step 4)
 #########################################################################################
-        # Upload the psutil layer to S3
+        # Define the psutil layer from the local ZIP file
         psutil_layer_asset = s3_assets.Asset(self, "PsutilLayerAsset",
-            path="assets/psutil_layer.zip"
+            path="assets/psutil_layer.zip"  # Reference the local ZIP file
         )
+        
 
         CfnOutput(self, "PsutilLayerS3Url", 
             value=psutil_layer_asset.s3_object_url, 
