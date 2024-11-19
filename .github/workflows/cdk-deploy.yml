@@ -27,6 +27,10 @@ jobs:
         with:
           python-version: '3.9'
 
+      - name: Clean CDK Output Cache
+        run: |
+          rm -rf cdk.out
+
       # Set up Python virtual environment and install dependencies
       - name: Install Python dependencies
         run: |
