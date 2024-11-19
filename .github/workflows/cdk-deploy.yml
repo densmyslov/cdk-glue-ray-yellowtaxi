@@ -39,9 +39,19 @@ jobs:
         run: |
           mkdir -p assets/psutil_package/python
           python3.9 -m pip install psutil==6.1.0 -t assets/psutil_package/python/
+          # Ensure the folder structure is correct
+          if [ -d "assets/psutil_package/python-3" ]; then
+            mv assets/psutil_package/python-3 assets/psutil_package/python
+          fi
           cd assets/psutil_package
           zip -r ../psutil_layer.zip ./python
           cd ../..
+
+
+      # Verify psutil_layer.zip contents
+      - name: Verify psutil_layer.zip contents
+        run: |
+          unzip -l assets/psutil_layer.zip
 
       # Install AWS CDK globally
       - name: Install AWS CDK
