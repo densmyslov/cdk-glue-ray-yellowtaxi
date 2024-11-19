@@ -77,6 +77,9 @@ class CdkGlueRayYellowtaxiStack(Stack):
             path="assets/psutil_layer.zip"
         )
 
+        print(f"Psutil Layer S3 URL: {psutil_layer_asset.s3_object_url}")
+
+
 
 #########################################################################################
 # Glue Job (Step 3)
