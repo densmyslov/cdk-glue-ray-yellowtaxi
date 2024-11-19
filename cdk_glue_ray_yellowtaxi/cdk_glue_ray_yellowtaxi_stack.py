@@ -70,6 +70,17 @@ class CdkGlueRayYellowtaxiStack(Stack):
         CfnOutput(self, "GlueRayRoleArn", value=glue_ray_role.role_arn, description="The ARN of the Glue Ray job IAM Role")
 
 #########################################################################################
+# Glue Layer (Step 4)
+#########################################################################################
+        # Upload the psutil package to S3
+        psutil_layer = glue.CfnJob.PythonScriptProperty(
+            name="psutil_layer",
+            python_version="3.9",
+            script_location=psutil_package_asset.s3_object_url
+        )
+
+
+#########################################################################################
 # Glue Job (Step 3)
 #########################################################################################
         # Upload the Glue job script to S3
@@ -101,7 +112,8 @@ class CdkGlueRayYellowtaxiStack(Stack):
             description="AWS Glue job for processing data using Pythonshell",
             default_arguments={
                 "--ENV_NAME": env_name,
-                "--BUCKET_NAME": bucket_name
+                "--BUCKET_NAME": bucket_name,
+                "--additional-python-modules": psutil_package_asset.s3_object_url
             }
         )
 

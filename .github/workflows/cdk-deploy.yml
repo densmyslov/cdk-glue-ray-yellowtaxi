@@ -27,10 +27,14 @@ jobs:
           python -m venv .venv
           source .venv/bin/activate
           pip install -r requirements.txt
-          pip install psutil==6.1.0 -t assets/psutil_package/
-          cd assets/psutil_package
-          zip -r ../psutil_layer.zip .
-          cd ../..
+          - name: Package psutil for Glue Layer
+          run: |
+            mkdir -p assets/psutil_package/python
+            pip install psutil==6.1.0 -t assets/psutil_package/python/
+            cd assets/psutil_package
+            zip -r ../psutil_layer.zip ./python
+            cd ../..
+        
 
       # Install AWS CDK globally
       - name: Install AWS CDK
